@@ -7,6 +7,11 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.naive_bayes import MultinomialNB
 import pickle
 from nltk.stem import WordNetLemmatizer
+# 1. Create the correct absolute path to the 'nltk_data' folder
+nltk_path = os.path.join(os.path.dirname(__file__), "nltk_data")
+
+# 2. Tell NLTK to look for resources in that folder
+nltk.data.path.append(nltk_path)
 
 nltk.download('punkt')
 nltk.download('wordnet')

@@ -4,6 +4,7 @@ import json
 import nltk
 from nltk.stem import WordNetLemmatizer
 import random  # <-- Add this at the top
+nltk.data.path.append("nltk_data")
 
 app = Flask(__name__)
 
