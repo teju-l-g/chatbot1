@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot with Voice</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- Toggle button -->
+  <button onclick="toggleHistory()" style="margin: 10px;">Show/Hide Chat History</button>
+
+  <!-- Chat History Container (Initially hidden) -->
+  <div id="chatHistoryContainer" style="display: none;">
+    <div class="chatlogs" id="chatlogs"></div>
+  </div>
+
+  <!-- Chat input section -->
+  <div class="chatbox">
+    <div class="chat-form">
+      <input id="userInput" type="text" placeholder="Type or speak your message...">
+      <button onclick="sendMessage()">Send</button>
+      <button id="micButton" onclick="startListening()">🎤</button>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    function sendMessage() {
+      let userText = document.getElementById('userInput').value;
+      if (userText === '') return;
+
+      const chatlogs = document.getElementById('chatlogs');
+      chatlogs.innerHTML += `<div class='user'><strong>You:</strong> ${userText}</div>`;
+
+      fetch('/get', {
+        method: 'POST',
+        body: new URLSearchParams({ msg: userText }),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      })
+      .then(res => res.text())
+      .then(botReply => {
+        chatlogs.innerHTML += `<div class='bot'><strong>Bot:</strong> ${botReply}</div>`;
+        document.getElementById('userInput').value = '';
+        chatlogs.scrollTop = chatlogs.scrollHeight;
+      });
+    }
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+
+      recognition.onstart = function () {
+        console.log('Voice recognition started');
+      };
+
+      recognition.onresult = function (event) {
+        const voiceInput = event.results[0][0].transcript;
+        document.getElementById('userInput').value = voiceInput;
+        sendMessage();
+      };
+
+      recognition.onerror = function (event) {
+        console.error('Voice recognition error:', event.error);
+        alert('Voice recognition error: ' + event.error);
+      };
+
+      recognition.onend = function () {
+        console.log('Voice recognition ended');
+      };
+
+      recognition.start();
+    }
+
+    function toggleHistory() {
+      const container = document.getElementById('chatHistoryContainer');
+      container.style.display = (container.style.display === 'none') ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
